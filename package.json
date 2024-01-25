@@ -15,6 +15,7 @@
     ]
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.4",
     "dotenv": "^16.4.1",
     "formik": "^2.4.5",
     "localforage": "^1.10.0",
