@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Auth0Provider } from "@auth0/auth0-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ResourceProvider } from "./contexts/ResourceContext.jsx";
 import App from "./App.jsx";
 
 const router = createBrowserRouter([
@@ -20,7 +21,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         redirect_uri: window.location.origin,
       }}
     >
-      <RouterProvider router={router} />
+      <ResourceProvider>
+        <RouterProvider router={router} />
+      </ResourceProvider>
     </Auth0Provider>
   </React.StrictMode>
 );
