@@ -1,15 +1,15 @@
 import { Formik, Form, Field, ErrorMessage } from "formik";
-import Education from "../../../BoundedContext/Backgrounds/Domain/Education";
-import ensureDataIsValid from "../../../BoundedContext/Shared/Application/ensureDataIsValid";
-import TitleForm from "../Categories/TitleForm";
-import fillField from "../../helpers/fillField";
-import generateId from "../../helpers/generateId";
-import useResource from "../../hooks/useResource";
+import Experience from "../../../../BoundedContext/Backgrounds/Domain/Experience";
+import ensureDataIsValid from "../../../../BoundedContext/Shared/Application/ensureDataIsValid";
+import RoleForm from "../Categories/RoleForm";
+import fillField from "../../../helpers/fillField";
+import generateId from "../../../helpers/generateId";
+import useResource from "../../../hooks/useResource";
 
-export default function EducationForm(
-  exposeEducationId,
-  onSubmitTitle,
-  onSubmitEducation
+export default function ExperienceForm(
+  exposeExperienceId,
+  onSubmitRole,
+  onSubmitExperience
 ) {
   const { createABackground, userId } = useResource();
 
@@ -25,26 +25,27 @@ export default function EducationForm(
         },
         startDate: "",
         endDate: "",
+        description: "",
       }}
       validate={(values) => {
-        return ensureDataIsValid(values, Education);
+        return ensureDataIsValid(values, Experience);
       }}
       onSubmit={async (values, { setSubmitting }) => {
-        const resource = "educations";
+        const resource = "experiences";
 
-        await onSubmitTitle();
+        await onSubmitRole();
         await createABackground(resource, values);
 
-        exposeEducationId(values._id);
-        onSubmitEducation();
+        exposeExperienceId(values._id);
+        onSubmitExperience();
         setSubmitting(false);
       }}
     >
       {({ isSubmitting, setValues }) => (
         <Form>
-          <TitleForm
-            exposeTitleId={(titleId) => fillField("name", setValues, titleId)}
-            onSubmitTitle={() => Promise.resolve()}
+          <RoleForm
+            exposeRoleId={(roleId) => fillField("name", setValues, roleId)}
+            onSubmitRole={() => Promise.resolve()}
           />
           <Field name="place.name" />
           <ErrorMessage name="place.name" component="span" />
@@ -54,6 +55,8 @@ export default function EducationForm(
           <ErrorMessage name="startDate" component="span" />
           <Field type="date" name="endDate" />
           <ErrorMessage name="endDate" component="span" />
+          <Field name="description" />
+          <ErrorMessage name="description" component="span" />
 
           <button type="submit" disabled={isSubmitting}>
             Submit
