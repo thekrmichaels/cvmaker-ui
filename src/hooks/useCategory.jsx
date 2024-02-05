@@ -1,157 +1,99 @@
 import { useState } from "react";
-
-export default function useContactHandlers(){
-  const [datos, setDatos] = useState([]);
-  const [editIndex, setEditIndex] = useState(null);
-  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
-  const [isEditFormVisible, setIsEditFormVisible] = useState(false);
-
-  const handleEditar = (index) => {
-    setEditIndex(index);
-    setIsEditFormVisible(true);
-    setIsAddFormVisible(false);
-  };
-
-  const handleEliminar = (index) => {
-    const nuevosDatos = [...datos];
-    nuevosDatos.splice(index, 1);
-    setDatos(nuevosDatos);
-    setEditIndex(null);
-    setIsAddFormVisible(false);
-    setIsEditFormVisible(false);
-  };
-
-  const handleAgregar = () => {
-    setEditIndex(null);
-    setIsAddFormVisible(true);
-    setIsEditFormVisible(false);
-  };
-
-  const handleCancelar = () => {
-    setEditIndex(null);
-    setIsAddFormVisible(false);
-    setIsEditFormVisible(false);
-  };
-
-  const handleAceptar = (index, valor) => {
-    const nuevosDatos = [...datos];
-    if (index !== null) {
-      nuevosDatos[index] = valor;
-    } else {
-      nuevosDatos.push(valor);
-    }
-    setDatos(nuevosDatos);
-    setEditIndex(null);
-    setIsAddFormVisible(false);
-    setIsEditFormVisible(false);
-  };
-
-  return {
-    datos,
-    editIndex,
-    isAddFormVisible,
-    isEditFormVisible,
-    handleEditar,
-    handleEliminar,
-    handleAgregar,
-    handleCancelar,
-    handleAceptar,
-  };
-}
-
-/*
-import { useState } from "react";
-import createCategory from "../../BoundedContext/Shared/Categories/Application/CreateCategory";
-import deleteCategory from "../../BoundedContext/Shared/Categories/Application/DeleteCategory";
-import readCategories from "../../BoundedContext/Shared/Categories/Application/ReadCategories";
-import updateCategory from "../../BoundedContext/Shared/Categories/Application/UpdateCategory";
+import {
+  createCategory,
+  deleteCategory,
+  readCategories,
+  updateCategory,
+} from "../../BoundedContext/Shared/Categories/Application";
 import RESTCategoryRepository from "../../BoundedContext/Shared/Categories/Infrastructure/RESTCategoryRepository";
-import generateId from "../helpers/generateId";
 
 export default function useCategory(userId) {
   const [categoryData, setCategoryData] = useState([]);
+  const [categoryId, setCategoryId] = useState(null);
+  const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+  const [isEditFormVisible, setIsEditFormVisible] = useState(false);
 
-  async function getCategories(resource) {
-    try {
-      const categories = await readCategories(
-        resource,
-        RESTCategoryRepository,
-        userId
-      );
+  function handleAdd() {
+    setCategoryId(null);
+    setIsAddFormVisible(true);
+    setIsEditFormVisible(false);
+  }
 
-      setCategoryData(categories);
-    } catch (error) {
-      console.error("Error al obtener datos:", error);
+  function handleCancel() {
+    setCategoryId(null);
+    setIsAddFormVisible(false);
+    setIsEditFormVisible(false);
+  }
+
+  async function handleCreate(resource, newCategory) {
+    await createCategory(resource, RESTCategoryRepository, newCategory);
+
+    setCategoryData((prevData) => [...prevData, newCategory]);
+    setCategoryId(null);
+    setIsAddFormVisible(false);
+    setIsEditFormVisible(false);
+  }
+
+  async function handleDelete(id, resource, categoryId) {
+    await deleteCategory(resource, RESTCategoryRepository, categoryId);
+
+    setCategoryData((prevData) => prevData.filter((_, index) => index !== id));
+    setCategoryId(null);
+    setIsAddFormVisible(false);
+    setIsEditFormVisible(false);
+  }
+
+  function handleEdit(id) {
+    setCategoryId(id);
+    setIsEditFormVisible(true);
+    setIsAddFormVisible(false);
+  }
+
+  async function handleRead(resource) {
+    const categories = await readCategories(
+      resource,
+      RESTCategoryRepository,
+      userId
+    );
+    const categoriesArray = Object.values(categories).map((category) => ({
+      id: category._id,
+      ...category,
+    }));
+
+    if (JSON.stringify(categoriesArray) !== JSON.stringify(categoryData)) {
+      setCategoryData(categoriesArray);
     }
   }
 
-  function getCategoryById(categoryId) {
-    return categoryData.find((category) => category._id === categoryId);
-  }
+  async function handleUpdate(id, resource, updatedCategory) {
+    await updateCategory(
+      resource,
+      RESTCategoryRepository,
+      updatedCategory.id,
+      updatedCategory
+    );
 
-  async function createACategory(resource, newCategory) {
-    try {
-      // const response =
-      await createCategory(resource, RESTCategoryRepository, newCategory);
-      /*
-      setCategoryData((prevData) => ({
-        ...prevData,
-        [resource]: [...prevData[resource], response.data],
-      }));
-    
-    } catch (error) {
-      if (error.response.status === 409) {
-        newCategory._id = generateId();
-
-        await createCategory(resource, RESTCategoryRepository, newCategory);
-      }
-    }
-  }
-
-  async function updateACategory(resource, categoryId, modifiedCategory) {
-    try {
-      // const response =
-      await updateCategory(
-        resource,
-        RESTCategoryRepository,
-        categoryId,
-        modifiedCategory
-      );
-      /*
-      setCategoryData((prevData) => ({
-        ...prevData,
-        [resource]: prevData[resource].map((category) =>
-          category._id === categoryId ? response.data : category
-        ),
-      }));
-    
-    } catch (error) {
-      console.error("Error al actualizar categoría:", error);
-    }
-  }
-
-  async function deleteACategory(resource, categoryId) {
-    try {
-      await deleteCategory(resource, RESTCategoryRepository, categoryId);
-
-      setCategoryData((prevData) => ({
-        ...prevData,
-        [resource]: prevData[resource].filter(
-          (category) => category._id !== categoryId
-        ),
-      }));
-    } catch (error) {
-      console.error("Error al eliminar categoría:", error);
-    }
+    setCategoryData((prevData) =>
+      prevData.map((category, index) =>
+        index === id ? { ...category, ...updatedCategory } : category
+      )
+    );
+    setCategoryId(null);
+    setIsAddFormVisible(false);
+    setIsEditFormVisible(false);
   }
 
   return {
     categoryData,
-    getCategories,
-    getCategoryById,
-    createACategory,
-    updateACategory,
-    deleteACategory,
+    categoryId,
+    handleAdd,
+    handleCancel,
+    handleCreate,
+    handleDelete,
+    handleEdit,
+    handleRead,
+    handleUpdate,
+    isAddFormVisible,
+    isEditFormVisible,
   };
 }
-*/
