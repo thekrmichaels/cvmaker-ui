@@ -1,6 +1,5 @@
-import Background from "../Domain/Background";
-import BackgroundRepository from "../Domain/BackgroundRepository";
+import { Background, BackgroundRepository } from "../Domain";
 
-export default async function updateBackground(resource, repository = BackgroundRepository, id = Background._id, background = Background) {
-  await repository.update(resource, id, background)
+export default function updateBackground(resource, repository = BackgroundRepository, id = Background.id, background = Background) {
+  repository.update(resource, id, background)
 }

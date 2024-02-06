@@ -4,7 +4,7 @@ import categoryId from "../../Categories/Domain/ValueObjects/CategoryId"
 import userId from "../../Users/Domain/ValueObjects/UserId"
 
 const Background = z.object({
-  _id: backgroundId,
+  id: backgroundId,
   user_id: userId,
   category: categoryId,
   name: categoryId,

@@ -1,6 +1,5 @@
-import Background from "../Domain/Background";
-import BackgroundRepository from "../Domain/BackgroundRepository";
+import { Background, BackgroundRepository } from "../Domain";
 
-export default async function deleteBackground(resource, repository = BackgroundRepository, id = Background._id) {
-  await repository.delete(resource, id)
+export default function deleteBackground(resource, repository = BackgroundRepository, id = Background.id) {
+  repository.delete(resource, id)
 }
